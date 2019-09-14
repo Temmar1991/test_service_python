@@ -76,10 +76,9 @@ async def get_last_tweet(request):
             tweet = status.get('text')
             id_message = status.get('id')
             published_at = status.get('created_at')
-            user = status.get('user').get('id').get('name')
-            hashtag = status['entities']['hashtags'].setdefault('text', None)
-            hashtag_list.append(hashtag)
-            entry = ResultsTwitter(id_message, hashtag, tweet, user, published_at)
+            user = status['user']['name']
+            tags = ", ".join([status['text'] for status in status['entities']['hashtags']])
+            entry = ResultsTwitter(id_message, tags, tweet, user, published_at)
             ses = connect()
             ses.add(entry)
             ses.commit()
@@ -88,11 +87,11 @@ async def get_last_tweet(request):
             id_list.append(id_message)
             pubtime_list.append(published_at)
             user_list.append(user)
-
+            hashtag_list.append(tags)
     response = {'id': id_list,
                 'phrase': search_list,
                 'published_at': pubtime_list,
-                'author_id': user_list,
+                'author': user_list,
                 'hashtags': hashtag_list}
     # return JSONResponse(statuses)
     return JSONResponse(response)
